@@ -1,42 +1,47 @@
-import { api } from '../lib/axios'
-import { Order, OrderStatus, PaginatedResponse } from '../types'
+import { api } from "../lib/axios";
+import { Order, OrderStatus, PaginatedResponse } from "../types";
 
 export const ordersService = {
-  list: async (params?: Record<string, string>): Promise<PaginatedResponse<Order>> => {
-    const { data } = await api.get('/api/orders/', { params })
-    return data
+  list: async (
+    params?: Record<string, string>,
+  ): Promise<PaginatedResponse<Order>> => {
+    const { data } = await api.get("/api/orders/", { params });
+    return data;
   },
 
   create: async (payload: {
-    delivery_type: string
-    items: { product: number; quantity: number }[]
+    delivery_type: string;
+    delivery_address?: string; // ← AJOUT
+    items: { product: number; quantity: number }[];
   }): Promise<Order> => {
-    const { data } = await api.post('/api/orders/', payload)
-    return data
+    const { data } = await api.post("/api/orders/", payload);
+    return data;
   },
 
   getById: async (id: number): Promise<Order> => {
-    const { data } = await api.get(`/api/orders/${id}/`)
-    return data
+    const { data } = await api.get(`/api/orders/${id}/`);
+    return data;
   },
 
   updateStatus: async (id: number, status: OrderStatus): Promise<Order> => {
-    const { data } = await api.patch(`/api/orders/${id}/update_status/`, { status })
-    return data
-  },
-  confirmDelivery: async (id: number): Promise<Order> => {
-  const { data } = await api.post(`/api/orders/${id}/confirm_delivery/`)
-  return data
-},
-  // ✅ Correction : retourne un tableau d'Order (non paginé)
-  myOrders: async (): Promise<Order[]> => {
-    const { data } = await api.get('/api/orders/my_orders/')
-    return data // data est directement le tableau
+    const { data } = await api.patch(`/api/orders/${id}/update_status/`, {
+      status,
+    });
+    return data;
   },
 
-  // ✅ Correction : retourne un tableau d'Order
-  farmerOrders: async (): Promise<Order[]> => {
-    const { data } = await api.get('/api/orders/farmer_orders/')
-    return data
+  confirmDelivery: async (id: number): Promise<Order> => {
+    const { data } = await api.post(`/api/orders/${id}/confirm_delivery/`);
+    return data;
   },
-}
+
+  myOrders: async (): Promise<Order[]> => {
+    const { data } = await api.get("/api/orders/my_orders/");
+    return data;
+  },
+
+  farmerOrders: async (): Promise<Order[]> => {
+    const { data } = await api.get("/api/orders/farmer_orders/");
+    return data;
+  },
+};

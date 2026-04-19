@@ -20,23 +20,14 @@ import { Spinner } from "../components/shared/Loader";
 import { formatDate } from "../utils/helpers";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
-
-type Delivery = {
-  id: number;
-  order: number;
-  delivery_address: string;
-  delivery_status: "PENDING" | "IN_TRANSIT" | "DELIVERED" | "FAILED";
-  delivery_date: string | null;
-  notes: string;
-  created_at: string;
-  updated_at: string;
-};
+import type { Delivery } from "../types"; // ✅ import unique du type
 
 export default function Deliveries() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
 
+  // ✅ utilisation correcte du typage, pas de conflit
   const { data, isLoading } = useQuery({
     queryKey: ["deliveries"],
     queryFn: () => deliveryService.list(),
@@ -44,8 +35,7 @@ export default function Deliveries() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const { data } = await deliveryService.updateStatus(id, status);
-      return data;
+      return await deliveryService.updateStatus(id, status);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["deliveries"] });
@@ -62,8 +52,10 @@ export default function Deliveries() {
     return false;
   };
 
-  const deliveries = data?.results || data;
-  const filtered = deliveries?.filter((d: Delivery) =>
+  // ✅ gestion robuste : data peut être paginé (results) ou tableau direct
+  const deliveriesList =
+    (data as any)?.results ?? (Array.isArray(data) ? data : []);
+  const filtered = deliveriesList.filter((d: Delivery) =>
     filter ? d.delivery_status === filter : true,
   );
 
@@ -84,7 +76,6 @@ export default function Deliveries() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header responsive */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
               <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-green-700 dark:text-green-400" />
@@ -108,7 +99,7 @@ export default function Deliveries() {
             />
           </div>
 
-          {!filtered?.length ? (
+          {filtered.length === 0 ? (
             <EmptyState
               icon="🚚"
               title="Aucune livraison"
@@ -123,7 +114,6 @@ export default function Deliveries() {
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <Card padding="sm" className="p-4 sm:p-5">
-                    {/* En-tête : commande et statut */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 sm:mb-4">
                       <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-base sm:text-lg">
                         Commande #{delivery.order}
@@ -131,7 +121,6 @@ export default function Deliveries() {
                       <StatusBadge status={delivery.delivery_status} />
                     </div>
 
-                    {/* Détails */}
                     <div className="space-y-2 text-sm sm:text-base">
                       {delivery.delivery_address && (
                         <div className="flex items-start gap-2 text-stone-600 dark:text-stone-400">
@@ -160,7 +149,6 @@ export default function Deliveries() {
                       )}
                     </div>
 
-                    {/* Barre de progression */}
                     <div className="mt-4">
                       <div className="flex justify-between text-xs text-stone-400 mb-1.5">
                         <span>En attente</span>
@@ -184,7 +172,6 @@ export default function Deliveries() {
                       </div>
                     </div>
 
-                    {/* Action agriculteur */}
                     {canModify(delivery) && (
                       <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800">
                         <Button
@@ -205,7 +192,6 @@ export default function Deliveries() {
                       </div>
                     )}
 
-                    {/* Message livraison confirmée */}
                     {delivery.delivery_status === "DELIVERED" && (
                       <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 text-center text-sm text-green-600">
                         <CheckCircle className="w-4 h-4 inline mr-1" />

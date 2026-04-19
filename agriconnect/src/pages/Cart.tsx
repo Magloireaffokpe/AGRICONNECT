@@ -16,7 +16,6 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/shared/EmptyState";
 import { formatPrice, imageUrl } from "../utils/helpers";
-import LocationInput from "address-autocomplete-react";
 
 export default function Cart() {
   const {
