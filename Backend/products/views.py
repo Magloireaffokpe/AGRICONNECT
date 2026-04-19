@@ -17,14 +17,16 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering_fields = ["price", "created_at", "quantity_available"]
     ordering = ["-created_at"]
 
+
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
-            return [permissions.IsAuthenticated()]
+            # ✅ Autorise tout le monde (même non authentifié)
+            return [permissions.AllowAny()]
         if self.action == "create":
             return [IsFarmer()]
         if self.action in ["update", "partial_update", "destroy"]:
             return [IsFarmer(), IsOwnerOrAdmin()]
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated()]   
 
     def get_queryset(self):
         queryset = super().get_queryset()

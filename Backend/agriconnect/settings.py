@@ -74,7 +74,7 @@ TEMPLATES = [
         },
     },
 ]
-
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 WSGI_APPLICATION = "agriconnect.wsgi.application"
 
 # Database (PostgreSQL recommandé, mais SQLite possible en dev)
@@ -193,3 +193,4 @@ LOGGING = {
         "level": "INFO",
     },
 }
+EMAIL_USE_LOCALTIME = False

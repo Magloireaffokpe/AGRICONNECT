@@ -1,8 +1,8 @@
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from accounts.permissions import IsBuyer, IsOwnerOrAdmin
+from accounts.permissions import IsBuyer, IsOwnerOrAdmin, IsFarmer
 from .models import Review
 from .serializers import ReviewSerializer
 
@@ -27,5 +27,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def my_reviews(self, request):
         reviews = Review.objects.filter(buyer=request.user)
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsFarmer])
+    def farmer_reviews(self, request):
+        """Renvoie tous les avis sur les produits de l'agriculteur connecté."""
+        user = request.user
+        reviews = Review.objects.filter(product__farmer=user).select_related('product', 'buyer')
+        page = self.paginate_queryset(reviews)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(reviews, many=True)
         return Response(serializer.data)

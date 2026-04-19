@@ -1,3 +1,7 @@
+
+import secrets
+from urllib.parse import quote
+
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,8 +11,8 @@ from rest_framework import filters
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 from datetime import timedelta
-from django.core.mail import send_mail
-
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import PasswordResetToken
 from .serializers import (
@@ -139,35 +143,41 @@ class PasswordResetRequestView(APIView):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
+
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {
-                    "message": "Si cet email existe, un lien de réinitialisation a été envoyé."
-                },
+                {"message": "Si cet email existe, un lien de réinitialisation a été envoyé."},
                 status=status.HTTP_200_OK,
             )
 
+        # Supprimer les anciens tokens
         PasswordResetToken.objects.filter(user=user).delete()
-        token = get_random_string(64)
+
+        # Générer un token hexadécimal (pas de caractères spéciaux)
+        token = secrets.token_hex(32)
         expires_at = timezone.now() + timedelta(hours=24)
         PasswordResetToken.objects.create(user=user, token=token, expires_at=expires_at)
 
-        # À adapter avec l'URL de votre frontend
-        reset_link = f"https://votre-frontend.com/reset-password?token={token}"
-        send_mail(
-            "Réinitialisation mot de passe AgriConnect",
-            f"Cliquez sur ce lien pour réinitialiser votre mot de passe : {reset_link}",
-            "noreply@agriconnect.com",
-            [email],
-            fail_silently=False,
-        )
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+
+        # En développement : afficher le lien dans la console
+        print(f"\n=== LIEN DE RÉINITIALISATION ===\n{reset_link}\n")
+
+        # Optionnel : essayer d’envoyer un email simple (sans EmailMessage) en ignorant l’erreur
+        # send_mail(
+        #     subject="Réinitialisation mot de passe AgriConnect",
+        #     message=f"Bonjour {user.first_name},\n\nCliquez sur ce lien : {reset_link}",
+        #     from_email="noreply@agriconnect.com",
+        #     recipient_list=[email],
+        #     fail_silently=True,
+        # )
+
         return Response(
-            {"message": "Un email vous a été envoyé."}, status=status.HTTP_200_OK
+            {"message": "Un email vous a été envoyé (consultez la console Django)."},
+            status=status.HTTP_200_OK,
         )
-
-
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 

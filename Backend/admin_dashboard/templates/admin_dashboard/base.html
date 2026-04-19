@@ -1,94 +1,166 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administration AgriConnect</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f6;
-            color: #2c3e50;
-        }
-        .navbar-custom {
-            background: linear-gradient(135deg, #1e7145 0%, #2e8b57 100%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f4f7f6;
+        color: #2c3e50;
+      }
+      .navbar-custom {
+        background: linear-gradient(135deg, #1e7145 0%, #2e8b57 100%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .nav-btn {
+        border-radius: 20px;
+        padding: 0.375rem 1rem;
+        transition: all 0.3s ease;
+      }
+      .nav-btn:hover {
+        transform: translateY(-2px);
+      }
+      .card-custom {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+      }
+      .table-custom th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+      }
+      /* Responsive ajustements */
+      @media (max-width: 768px) {
+        .navbar .btn-sm {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
         }
         .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 0.5px;
+          font-size: 1.2rem;
         }
-        .nav-btn {
-            border-radius: 20px;
-            padding: 0.375rem 1rem;
-            transition: all 0.3s ease;
-        }
-        .nav-btn:hover {
-            transform: translateY(-2px);
-        }
-        .card-custom {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            background: #ffffff;
-        }
-        .table-custom th {
-            background-color: #f8f9fa;
-            color: #6c757d;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'admin_dashboard:stats' %}">
-                <i class="fas fa-leaf me-2"></i>AgriConnect Admin
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'admin_dashboard:stats' %}">
+          <i class="fas fa-leaf me-2"></i>AgriConnect Admin
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <!-- L'espace pour d'éventuels liens supplémentaires -->
+          </ul>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="text-white-50 me-3 d-none d-md-inline">
+              <i class="fas fa-user-circle me-1"></i> {{ request.user.email }}
+            </span>
+
+            <!-- Bouton Statistiques -->
+            <a
+              href="{% url 'admin_dashboard:stats' %}"
+              class="btn btn-sm btn-outline-light nav-btn"
+            >
+              <i class="fas fa-chart-pie me-1"></i>Stats
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    </ul>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="text-white-50 me-3 d-none d-md-inline">
-                        <i class="fas fa-user-circle me-1"></i> {{ request.user.email }}
-                    </span>
-                    <a href="{% url 'admin_dashboard:stats' %}" class="btn btn-sm btn-outline-light nav-btn"><i class="fas fa-chart-pie me-1"></i>Stats</a>
-                    <a href="{% url 'admin_dashboard:user_list' %}" class="btn btn-sm btn-outline-light nav-btn"><i class="fas fa-users me-1"></i>Utilisateurs</a>
-                    <a href="{% url 'admin:index' %}" class="btn btn-sm btn-outline-light nav-btn"><i class="fas fa-cogs me-1"></i>Django</a>
-                    <a href="{% url 'admin_dashboard:change_password' %}" class="btn btn-sm text-white" title="Changer mot de passe"><i class="fas fa-key"></i></a>
-                    <form action="{% url 'admin_dashboard:logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger nav-btn ms-2">
-                            <i class="fas fa-sign-out-alt me-1"></i>Quitter
-                        </button>
-                    </form>
-                </div>
-            </div>
+
+            <!-- Bouton Utilisateurs -->
+            <a
+              href="{% url 'admin_dashboard:user_list' %}"
+              class="btn btn-sm btn-outline-light nav-btn"
+            >
+              <i class="fas fa-users me-1"></i>Utilisateurs
+            </a>
+
+            <!-- 🆕 Bouton Livraisons -->
+            <a
+              href="{% url 'admin_dashboard:delivery_list' %}"
+              class="btn btn-sm btn-outline-light nav-btn"
+            >
+              <i class="fas fa-truck me-1"></i>Livraisons
+            </a>
+
+            <!-- Bouton Admin Django -->
+            <a
+              href="{% url 'admin:index' %}"
+              class="btn btn-sm btn-outline-light nav-btn"
+            >
+              <i class="fas fa-cogs me-1"></i>Django
+            </a>
+
+            <!-- Bouton Changer mot de passe (icône) -->
+            <a
+              href="{% url 'admin_dashboard:change_password' %}"
+              class="btn btn-sm text-white"
+              title="Changer mot de passe"
+            >
+              <i class="fas fa-key"></i>
+            </a>
+
+            <!-- Bouton Déconnexion -->
+            <form
+              action="{% url 'admin_dashboard:logout' %}"
+              method="post"
+              style="display: inline"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger nav-btn ms-2">
+                <i class="fas fa-sign-out-alt me-1"></i>Quitter
+              </button>
+            </form>
+          </div>
         </div>
+      </div>
     </nav>
-    
+
     <div class="container mt-5 mb-5">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        
-        {% block content %}{% endblock %}
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% block content %}{% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+  </body>
 </html>

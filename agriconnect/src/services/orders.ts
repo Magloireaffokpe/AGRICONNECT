@@ -24,7 +24,10 @@ export const ordersService = {
     const { data } = await api.patch(`/api/orders/${id}/update_status/`, { status })
     return data
   },
-
+  confirmDelivery: async (id: number): Promise<Order> => {
+  const { data } = await api.post(`/api/orders/${id}/confirm_delivery/`)
+  return data
+},
   // ✅ Correction : retourne un tableau d'Order (non paginé)
   myOrders: async (): Promise<Order[]> => {
     const { data } = await api.get('/api/orders/my_orders/')

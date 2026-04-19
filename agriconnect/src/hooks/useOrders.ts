@@ -57,3 +57,16 @@ export const useUpdateOrderStatus = () => {
     onError: () => toast.error('Erreur lors de la mise à jour'),
   })
 }
+
+export const useConfirmDelivery = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => ordersService.confirmDelivery(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-orders'] })
+      qc.invalidateQueries({ queryKey: ['farmer-orders'] })
+      toast.success('Merci ! Votre confirmation a été enregistrée.')
+    },
+    onError: () => toast.error('Erreur lors de la confirmation.'),
+  })
+}

@@ -1,0 +1,52 @@
+{% extends 'admin_dashboard/base.html' %} {% block content %}
+<h2>Livraisons</h2>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Commande</th>
+        <th>Acheteur</th>
+        <th>Adresse</th>
+        <th>Statut livraison</th>
+        <th>Créée le</th>
+        <th>Livraison prévue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for delivery in deliveries %}
+      <tr>
+        <td>{{ delivery.id }}</td>
+        <td>
+          <a href="{% url 'admin:orders_order_change' delivery.order.id %}"
+            >#{{ delivery.order.id }}</a
+          >
+        </td>
+        <td>
+          {{ delivery.order.buyer.get_full_name }}<br />
+          <small class="text-muted">{{ delivery.order.buyer.email }}</small>
+        </td>
+        <td>{{ delivery.delivery_address|default:"—" }}</td>
+        <td>
+          {% if delivery.delivery_status == 'PENDING' %}
+          <span class="badge bg-warning">En attente</span>
+          {% elif delivery.delivery_status == 'IN_TRANSIT' %}
+          <span class="badge bg-info">En transit</span>
+          {% elif delivery.delivery_status == 'DELIVERED' %}
+          <span class="badge bg-success">Livrée</span>
+          {% else %}
+          <span class="badge bg-danger">Échouée</span>
+          {% endif %}
+        </td>
+        <td>{{ delivery.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ delivery.delivery_date|date:"d/m/Y"|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7">Aucune livraison pour le moment.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

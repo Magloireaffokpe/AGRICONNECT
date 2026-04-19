@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
 from django.urls import reverse_lazy
+from delivery.models import Delivery
 
 
 class AdminStatsView(APIView):
@@ -142,3 +143,27 @@ def stats_dashboard(request):
         "top_products": top_products,
     }
     return render(request, "admin_dashboard/stats.html", context)
+
+
+
+@user_passes_test(is_admin, login_url="/secret-agri-admin/login/")
+def delivery_list(request):
+    deliveries = Delivery.objects.select_related('order__buyer').all().order_by('-created_at')
+    return render(request, "admin_dashboard/delivery_list.html", {"deliveries": deliveries})
+
+@user_passes_test(is_admin, login_url="/secret-agri-admin/login/")
+def toggle_verify(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if user.role == 'FARMER' and hasattr(user, 'farmer_profile'):
+        profile = user.farmer_profile
+        profile.verified = not profile.verified
+        profile.save()
+        messages.success(request, f"Agriculteur {user.email} {'vérifié' if profile.verified else 'dévérifié'}.")
+    else:
+        messages.error(request, "Cet utilisateur n'est pas un agriculteur.")
+    return redirect("admin_dashboard:user_list")
+
+@user_passes_test(is_admin, login_url="/secret-agri-admin/login/")
+def user_detail(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    return render(request, "admin_dashboard/user_detail.html", {"user": user})

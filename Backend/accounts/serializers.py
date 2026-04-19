@@ -46,6 +46,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     password_confirm = serializers.CharField(write_only=True, required=True)
     farm_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    bio = serializers.CharField(write_only=True, required=False, allow_blank=True)   # 👈 ajout
 
     class Meta:
         model = User
@@ -59,6 +60,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password",
             "password_confirm",
             "farm_name",
+            "bio",           # 👈 ajout
         ]
 
     def validate(self, attrs):
@@ -71,11 +73,15 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("password_confirm")
         farm_name = validated_data.pop("farm_name", "")
+        bio = validated_data.pop("bio", "")               # 👈 ajout
         password = validated_data.pop("password")
         user = User.objects.create_user(password=password, **validated_data)
         if user.role == User.Role.FARMER:
-            FarmerProfile.objects.create(user=user, farm_name=farm_name)
+            FarmerProfile.objects.create(user=user, farm_name=farm_name, bio=bio)   # 👈 modifié
         return user
+
+
+# ... le reste du fichier (LoginSerializer, etc.) reste inchangé
 
 
 class LoginSerializer(serializers.Serializer):
