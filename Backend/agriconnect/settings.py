@@ -188,11 +188,12 @@ SIMPLE_JWT = {
 }
 
 # ─── CORS (pour communication avec frontend React/Vue) ─────────────
-CORS_ALLOWED_ORIGINS = config(
-    "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:5173",
-    cast=lambda v: [s.strip() for s in v.split(",")],
-)
+#CORS_ALLOWED_ORIGINS = config(
+ #   "CORS_ALLOWED_ORIGINS",
+  #  default="http://localhost:5173",
+   # cast=lambda v: [s.strip() for s in v.split(",")],
+#)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # ─── Email avec SendGrid (production) / Console (développement) ─────
