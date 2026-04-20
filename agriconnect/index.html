@@ -1,17 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AgriConnect – La marketplace agricole qui connecte fermiers et acheteurs" />
+    <meta
+      name="description"
+      content="AgriConnect – La marketplace agricole qui connecte fermiers et acheteurs"
+    />
+    <!-- Couleur de la barre d’état (thème) -->
+    <meta name="theme-color" content="#166534" />
     <title>AgriConnect</title>
+
+    <!-- Préconnexion aux serveurs Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Chargement non‑bloquant de Poppins (ne bloque pas le rendu initial) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- Style de fallback pour éviter le FOUT (Flash of Unstyled Text) -->
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        background-color: #fafaf9;
+        margin: 0;
+        padding: 0;
+      }
+      .no-js {
+        display: block;
+        text-align: center;
+        padding: 2rem;
+        background: #fef3c7;
+        color: #78350f;
+      }
+    </style>
   </head>
   <body>
+    <!-- Lien d’accessibilité : passer directement au contenu principal -->
+    <a
+      href="#main-content"
+      class="skip-to-content"
+      style="
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #166534;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        z-index: 100;
+        border-radius: 0 0 4px 4px;
+      "
+    >
+      Aller au contenu principal
+    </a>
+
     <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Gestion simple pour les navigateurs sans JS -->
+    <noscript>
+      <div class="no-js">
+        <p>
+          Votre navigateur ne supporte pas JavaScript. Certaines fonctionnalités
+          d'AgriConnect nécessitent JavaScript.
+        </p>
+        <p>Veuillez activer JavaScript ou utiliser un navigateur moderne.</p>
+      </div>
+    </noscript>
   </body>
 </html>

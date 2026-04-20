@@ -150,10 +150,20 @@ export default function Home() {
       <section className="relative min-h-[92vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1600&q=80&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop"
+            srcSet="
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=75&auto=format&fit=crop 640w,
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=75&auto=format&fit=crop 828w,
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop 1200w
+  "
+            sizes="100vw"
             alt="Champs agricoles"
             className="w-full h-full object-cover object-center"
             loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            width="1200"
+            height="800"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
