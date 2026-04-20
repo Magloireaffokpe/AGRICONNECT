@@ -18,6 +18,7 @@ import {
   Package,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect } from "react";
 
 /* ─── Data ─── */
 const stats = [
@@ -140,6 +141,16 @@ export default function Home() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
 
+  useEffect(() => {
+    // Hide the placeholder hero image once React loads
+    const placeholder = document.querySelector(
+      'div[style*="position: fixed"]',
+    ) as HTMLElement;
+    if (placeholder) {
+      placeholder.style.display = "none";
+    }
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -150,11 +161,11 @@ export default function Home() {
       <section className="relative min-h-[92vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop"
             srcSet="
-    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=75&auto=format&fit=crop 640w,
-    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=75&auto=format&fit=crop 828w,
-    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop 1200w
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop 640w,
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=60&auto=format&fit=crop 828w,
+    https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop 1200w
   "
             sizes="100vw"
             alt="Champs agricoles"
@@ -360,7 +371,7 @@ export default function Home() {
             >
               <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/3]">
                 <img
-                  src="https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=900&q=80&auto=format&fit=crop"
+                  src="https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=800&q=60&auto=format&fit=crop"
                   alt="Agriculteur dans son champ"
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -514,27 +525,27 @@ export default function Home() {
         >
           {[
             {
-              src: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&q=80&auto=format&fit=crop",
+              src: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=500&q=60&auto=format&fit=crop",
               alt: "Légumes frais",
               cls: "",
             },
             {
-              src: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80&auto=format&fit=crop",
+              src: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&q=60&auto=format&fit=crop",
               alt: "Tomates",
               cls: "",
             },
             {
-              src: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&q=80&auto=format&fit=crop",
+              src: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=500&q=60&auto=format&fit=crop",
               alt: "Fruits",
               cls: "hidden sm:block",
             },
             {
-              src: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=600&q=80&auto=format&fit=crop",
+              src: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=500&q=60&auto=format&fit=crop",
               alt: "Marché",
               cls: "hidden sm:block",
             },
             {
-              src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80&auto=format&fit=crop",
+              src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=60&auto=format&fit=crop",
               alt: "Ferme",
               cls: "hidden sm:block",
             },
@@ -626,7 +637,7 @@ export default function Home() {
               className="relative overflow-hidden rounded-3xl bg-stone-900 dark:bg-stone-800"
             >
               <img
-                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1400&q=80&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=60&auto=format&fit=crop"
                 alt="Champ agricole"
                 className="absolute inset-0 w-full h-full object-cover opacity-30"
                 loading="lazy"

@@ -21,11 +21,11 @@
     <link
       rel="preload"
       as="image"
-      href="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop"
+      href="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop"
       imagesrcset="
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=75&auto=format&fit=crop 640w,
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=75&auto=format&fit=crop 828w,
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=75&auto=format&fit=crop 1200w
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop 640w,
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=60&auto=format&fit=crop 828w,
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop 1200w
       "
       imagesizes="100vw"
       fetchpriority="high"
@@ -35,7 +35,6 @@
     <link rel="preload" as="style" href="/assets/index-CPMsTIRY.css" />
     <link rel="preload" as="script" href="/assets/index-DsEmUMMh.js" />
     <link rel="preload" as="script" href="/assets/Home-YRxiCdDI.js" />
-
 
     <!-- Chargement non‑bloquant de Poppins (ne bloque pas le rendu initial) -->
     <link
@@ -96,6 +95,36 @@
     </a>
 
     <div id="root"></div>
+
+    <!-- Placeholder hero image pour améliorer le LCP - sera caché par React -->
+    <div
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: -1;
+      "
+    >
+      <img
+        src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop"
+        srcset="
+          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop   640w,
+          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=60&auto=format&fit=crop   828w,
+          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop 1200w
+        "
+        sizes="100vw"
+        alt="Champs agricoles"
+        fetchpriority="high"
+        style="
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        "
+      />
+    </div>
 
     <script type="module" src="/src/main.tsx"></script>
 
