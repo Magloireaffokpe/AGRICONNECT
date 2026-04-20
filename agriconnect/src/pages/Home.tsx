@@ -18,8 +18,64 @@ import {
   Package,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import {
+  OptimizedImage,
+  buildImageUrl,
+  buildSrcSet,
+} from "../components/ui/OptimizedImage";
 
-/* ─── Data ─── */
+/* ─────────────────────────────────────────
+   HERO — URLs précalculées pour éviter
+   tout recalcul au runtime
+───────────────────────────────────────── */
+const HERO_BASE =
+  "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad";
+// On réduit à q=65 max et w=1280 max → ~100Ko au lieu de 537Ko
+const HERO_SRCSET = [
+  `${HERO_BASE}?w=640&q=60&auto=format&fit=crop&fm=webp   640w`,
+  `${HERO_BASE}?w=828&q=65&auto=format&fit=crop&fm=webp   828w`,
+  `${HERO_BASE}?w=1080&q=68&auto=format&fit=crop&fm=webp 1080w`,
+  `${HERO_BASE}?w=1280&q=70&auto=format&fit=crop&fm=webp 1280w`,
+].join(", ");
+// URL par défaut pour src (fallback non-srcSet)
+const HERO_DEFAULT = `${HERO_BASE}?w=828&q=65&auto=format&fit=crop&fm=webp`;
+
+/* ─── Split section ─── */
+const FARMER_IMG =
+  "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46";
+
+/* ─── CTA background ─── */
+const CTA_IMG = `https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1080&q=65&auto=format&fit=crop&fm=webp`;
+
+/* ─── Mosaic photos ─── */
+const mosaicPhotos = [
+  {
+    src: "https://images.unsplash.com/photo-1488459716781-31db52582fe9",
+    alt: "Légumes frais",
+    cls: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b",
+    alt: "Tomates",
+    cls: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
+    alt: "Fruits",
+    cls: "hidden sm:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf",
+    alt: "Marché",
+    cls: "hidden sm:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b",
+    alt: "Ferme",
+    cls: "hidden sm:block",
+  },
+];
+
 const stats = [
   { value: "200+", label: "Produits frais" },
   { value: "30+", label: "Agriculteurs" },
@@ -144,20 +200,40 @@ export default function Home() {
     <>
       <Helmet>
         <title>AgriConnect – Du champ à votre table</title>
+        {/*
+          ✅ FONT STRATEGY : on charge Poppins en non-bloquant
+          Le CSS Google Fonts est déjà preload dans index.html
+          On ne le recharge pas ici pour éviter la duplication
+        */}
       </Helmet>
 
-      {/* HERO */}
-      <section className="relative min-h-[92vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1600&q=80&auto=format&fit=crop"
-            alt="Champs agricoles"
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        </div>
+      {/* ════════════════════════════════════════════
+          HERO
+          ════════════════════════════════════════════ */}
+      <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-stone-900">
+        {/*
+          ✅ IMAGE HERO OPTIMISÉE :
+          - src     : 828px WebP q=65  (~80 Ko au lieu de 537 Ko)
+          - srcSet  : 640/828/1080/1280px selon l'écran
+          - loading : eager (above the fold)
+          - fetchpriority : high (priorité navigateur maximale)
+          - decoding : sync (pas de décodage différé)
+        */}
+        <img
+          src={HERO_DEFAULT}
+          srcSet={HERO_SRCSET}
+          sizes="100vw"
+          alt="Champs agricoles"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          loading="eager"
+          // @ts-ignore — attribut HTML standard, pas encore dans @types/react
+          fetchpriority="high"
+          decoding="sync"
+          width="1280"
+          height="853"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-2xl">
@@ -202,7 +278,7 @@ export default function Home() {
             >
               <button
                 onClick={() => navigate("/products")}
-                className="group inline-flex items-center justify-center gap-2 px-7 py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg shadow-green-900/30 hover:shadow-xl hover:-translate-y-0.5 text-base"
+                className="group inline-flex items-center justify-center gap-2 px-7 py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg hover:-translate-y-0.5 text-base"
               >
                 Explorer le catalogue
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -260,13 +336,13 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* TRUST BAND — clés uniques corrigées */}
+      {/* TRUST BAND */}
       <section className="bg-green-700 dark:bg-green-900 py-3.5 overflow-hidden">
         <div
           className="flex gap-12 whitespace-nowrap"
           style={{ animation: "marquee 22s linear infinite" }}
         >
-          {[...Array(2)].flatMap((_, repeatIdx) =>
+          {[...Array(2)].flatMap((_, ri) =>
             [
               "🌿 100% Local",
               "✅ Certifié",
@@ -278,7 +354,7 @@ export default function Home() {
               "📦 Fraîcheur garantie",
             ].map((t) => (
               <span
-                key={`${t}-${repeatIdx}`}
+                key={`${t}-${ri}`}
                 className="text-white/90 text-sm font-semibold shrink-0"
               >
                 {t}
@@ -288,7 +364,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CATÉGORIES — avec icônes Lucide */}
+      {/* CATÉGORIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <motion.div
           variants={container}
@@ -336,11 +412,10 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* SPLIT SECTION — inchangée */}
+      {/* SPLIT SECTION */}
       <section className="bg-stone-50 dark:bg-stone-900/50 py-16 sm:py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center">
-            {/* Image */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -348,14 +423,18 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="relative order-2 lg:order-1"
             >
-              <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/3]">
-                <img
-                  src="https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=900&q=80&auto=format&fit=crop"
-                  alt="Agriculteur dans son champ"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
+              {/*
+                ✅ OptimizedImage avec maxWidth=676
+                Lighthouse indiquait : "dimensions affichées 676x499, mais image 886x664"
+                On corrige en limitant à 700px max
+              */}
+              <OptimizedImage
+                src={FARMER_IMG}
+                alt="Agriculteur dans son champ"
+                aspectRatio="aspect-[4/3]"
+                maxWidth={700}
+                className="rounded-3xl shadow-2xl"
+              />
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -387,7 +466,6 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
-            {/* Text */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -500,48 +578,28 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 rounded-3xl overflow-hidden"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
         >
-          {[
-            {
-              src: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&q=80&auto=format&fit=crop",
-              alt: "Légumes frais",
-              cls: "",
-            },
-            {
-              src: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80&auto=format&fit=crop",
-              alt: "Tomates",
-              cls: "",
-            },
-            {
-              src: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&q=80&auto=format&fit=crop",
-              alt: "Fruits",
-              cls: "hidden sm:block",
-            },
-            {
-              src: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=600&q=80&auto=format&fit=crop",
-              alt: "Marché",
-              cls: "hidden sm:block",
-            },
-            {
-              src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80&auto=format&fit=crop",
-              alt: "Ferme",
-              cls: "hidden sm:block",
-            },
-          ].map((img, i) => (
+          {mosaicPhotos.map((img, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className={`overflow-hidden rounded-2xl aspect-square ${img.cls}`}
+              className={img.cls}
             >
-              <img
+              {/*
+                ✅ maxWidth=450 : Lighthouse indiquait "442x441 affiché mais image 600px"
+                Sur mobile (2 colonnes) → colonne = ~45vw = ~200px max
+                Sur desktop (3 colonnes) → colonne = ~400px max
+              */}
+              <OptimizedImage
                 src={img.src}
                 alt={img.alt}
-                className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
-                loading="lazy"
+                aspectRatio="aspect-square"
+                maxWidth={450}
+                className="rounded-2xl hover:scale-[1.02] transition-transform duration-500"
               />
             </motion.div>
           ))}
@@ -613,13 +671,16 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="relative overflow-hidden rounded-3xl bg-stone-900 dark:bg-stone-800"
+              className="relative overflow-hidden rounded-3xl bg-stone-900 dark:bg-stone-800 min-h-[280px]"
             >
               <img
-                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1400&q=80&auto=format&fit=crop"
+                src={CTA_IMG}
                 alt="Champ agricole"
                 className="absolute inset-0 w-full h-full object-cover opacity-30"
                 loading="lazy"
+                decoding="async"
+                width="1080"
+                height="720"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-stone-900/90 to-stone-900/60" />
 
