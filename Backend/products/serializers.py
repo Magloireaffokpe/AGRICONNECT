@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Product
+from django.conf import settings
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -7,6 +8,7 @@ class ProductSerializer(serializers.ModelSerializer):
     farmer_location = serializers.CharField(source="farmer.location", read_only=True)
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -36,7 +38,30 @@ class ProductSerializer(serializers.ModelSerializer):
             "review_count",
             "created_at",
             "updated_at",
+            "image",
         ]
+
+    def get_image(self, obj):
+        """Return image URL with fallback to local storage if Cloudinary fails"""
+        if not obj.image:
+            return None
+        
+        # If image has a URL method (Cloudinary), use it
+        if hasattr(obj.image, 'url'):
+            image_url = obj.image.url
+        else:
+            image_url = str(obj.image)
+        
+        # If URL is already absolute (from Cloudinary), return as-is
+        if image_url.startswith('http'):
+            return image_url
+        
+        # Otherwise, construct absolute URL for local storage
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(image_url)
+        
+        return image_url
 
     def get_average_rating(self, obj):
         reviews = obj.reviews.all()

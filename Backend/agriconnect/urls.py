@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import MediaServeView
 
 urlpatterns = [
     path("secret-agri-admin/", include("admin_dashboard.urls")),
@@ -12,6 +13,8 @@ urlpatterns = [
     path("api/orders/", include("orders.urls")),
     path("api/delivery/", include("delivery.urls")),
     path("api/reviews/", include("reviews.urls")),
+    # Media files fallback - serve from local storage
+    re_path(r'^media/(?P<path>.+)$', MediaServeView.as_view(), name='media-serve'),
     # Vues de réinitialisation de mot de passe
     path(
         "password-reset/",
@@ -43,6 +46,7 @@ urlpatterns = [
     ),
 ]
 
-# ⬇️ Ajoute ce bloc à la fin du fichier
+# ⬇️ En production, servir les images via la vue custom (déjà configurée ci-dessus)
+# En développement, utiliser Django's static view
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
