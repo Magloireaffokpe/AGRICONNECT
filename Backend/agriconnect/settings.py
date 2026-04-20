@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "cloudinary_storage",
     "cloudinary",
     # Local apps (AgriConnect)
+    "core",
     "accounts",
     "products",
     "orders",
@@ -124,14 +125,22 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Cloudinary configuration (production)
 if not DEBUG:
+    # Production: use Cloudinary for file storage
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     CLOUDINARY_STORAGE = {
         'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
         'API_KEY': config('CLOUDINARY_API_KEY', default=''),
         'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+        'SECURE': True,
+        'SECURE_VIDEO': True,
     }
+    
+    # Verify Cloudinary is configured
+    if not config('CLOUDINARY_CLOUD_NAME', default=''):
+        import warnings
+        warnings.warn("⚠️  CLOUDINARY_CLOUD_NAME not set! Images won't upload to Cloudinary in production.")
 else:
-    # En développement, stockage local
+    # Development: use local storage
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
 
