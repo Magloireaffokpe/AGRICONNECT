@@ -126,6 +126,18 @@
       />
     </div>
 
+    <!-- Script pour rendre le CSS non-bloquant -->
+    <script>
+      // Rendre le CSS injecté par Vite non-bloquant
+      const cssLink = document.querySelector('link[href*=".css"]');
+      if (cssLink) {
+        cssLink.media = "print";
+        cssLink.onload = function () {
+          this.media = "all";
+        };
+      }
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- Gestion simple pour les navigateurs sans JS -->
