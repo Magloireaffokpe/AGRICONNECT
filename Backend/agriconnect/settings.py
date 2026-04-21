@@ -1,19 +1,14 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-
 from decouple import config
+import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-xxx")
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-# Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -27,9 +22,10 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "corsheaders",
+    # ✅ Cloudinary — ordre important : storage AVANT cloudinary
     "cloudinary_storage",
     "cloudinary",
-    # Local apps (AgriConnect)
+    # Local apps
     "core",
     "accounts",
     "products",
@@ -40,9 +36,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # Doit être le plus haut possible
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Pour servir les fichiers statiques
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -71,19 +67,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "agriconnect.wsgi.application"
 
-# Database
-# -------------------------------------------------------------------
-# Use dj-database-url if DATABASE_URL is set (Render), otherwise fallback to PostgreSQL env vars
-import dj_database_url
-
-
-# Si DATABASE_URL est définie (production), on l'utilise
+# ─── Database ──────────────────────────────────────────────────────
 if config("DATABASE_URL", default=""):
     DATABASES = {
-        "default": dj_database_url.config(default=config("DATABASE_URL"))
+        "default": dj_database_url.config(
+            default=config("DATABASE_URL"),
+            conn_max_age=600,        # ✅ Connexions persistantes = moins de latence
+            conn_health_checks=True,
+        )
     }
 else:
-    # Sinon, on utilise les variables individuelles (développement)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -92,67 +85,86 @@ else:
             "PASSWORD": config("DB_PASSWORD", default=""),
             "HOST": config("DB_HOST", default="localhost"),
             "PORT": config("DB_PORT", default="5432"),
+            "CONN_MAX_AGE": 60,
         }
     }
 
-# Custom User Model (obligatoire)
 AUTH_USER_MODEL = "accounts.User"
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization
 LANGUAGE_CODE = "fr-fr"
-TIME_ZONE = "Africa/Porto-Novo"  # Bénin
+TIME_ZONE = "Africa/Porto-Novo"
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# ─── Static files ──────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media files (uploads produits)
+# ─── Media / Cloudinary ────────────────────────────────────────────
+# En développement : stockage local
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Cloudinary configuration (production)
-if not DEBUG:
-    # Production: use Cloudinary for file storage
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
-        'API_KEY': config('CLOUDINARY_API_KEY', default=''),
-        'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
-        'SECURE': True,
-        'SECURE_VIDEO': True,
-    }
-    
-    # Verify Cloudinary is configured
-    if not config('CLOUDINARY_CLOUD_NAME', default=''):
-        import warnings
-        warnings.warn("⚠️  CLOUDINARY_CLOUD_NAME not set! Images won't upload to Cloudinary in production.")
-else:
-    # Development: use local storage
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+# ✅ CORRECTION CLOUDINARY :
+# L'API django-cloudinary-storage a changé.
+# Il faut configurer cloudinary AVANT de définir DEFAULT_FILE_STORAGE.
+CLOUDINARY_CLOUD_NAME = config("CLOUDINARY_CLOUD_NAME", default="")
+CLOUDINARY_API_KEY    = config("CLOUDINARY_API_KEY",    default="")
+CLOUDINARY_API_SECRET = config("CLOUDINARY_API_SECRET", default="")
 
-# Auth redirects (admin panel)
+if not DEBUG and CLOUDINARY_CLOUD_NAME:
+    import cloudinary
+
+    # ✅ Étape 1 : configurer cloudinary directement (obligatoire)
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True,
+    )
+
+    # ✅ Étape 2 : aussi dans CLOUDINARY_STORAGE pour django-cloudinary-storage
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY":    CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
+        "SECURE":     True,
+        "MEDIA_TAG":  "agriconnect_media",   # tag pour regrouper les fichiers sur Cloudinary
+        "INVALID_VIDEO_ERROR_MESSAGE": "Veuillez uploader une image valide.",
+        "EXCLUDE_DELETE_ORPHANED_MEDIA_UNDER": 0,
+        "STATIC_TAG":   "agriconnect_static",
+        "MAGIC_FILE_PATH": "magic",
+    }
+
+    # ✅ Étape 3 : activer le stockage Cloudinary
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+    # En prod, les URLs media viennent de Cloudinary (pas de /media/ local)
+    MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/"
+
+elif not DEBUG and not CLOUDINARY_CLOUD_NAME:
+    import warnings
+    warnings.warn(
+        "⚠️  CLOUDINARY_CLOUD_NAME non défini en production ! "
+        "Les images ne seront pas sauvegardées sur Cloudinary."
+    )
+
+# ─── Auth redirects ────────────────────────────────────────────────
 LOGIN_URL = "/secret-agri-admin/login/"
 LOGIN_REDIRECT_URL = "/secret-agri-admin/users/"
 LOGOUT_REDIRECT_URL = "/secret-agri-admin/login/"
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ─── Django REST Framework ──────────────────────────────────────────
+# ─── Django REST Framework ─────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -170,19 +182,19 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
-        "user": "1000/day",
+        "anon": "200/day",
+        "user": "2000/day",
     },
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
 }
 
-# ─── SimpleJWT ──────────────────────────────────────────────────────
+# ─── SimpleJWT ─────────────────────────────────────────────────────
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME":  timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
+    "ROTATE_REFRESH_TOKENS":  True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
@@ -192,16 +204,11 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
 }
 
-# ─── CORS (pour communication avec frontend React/Vue) ─────────────
-#CORS_ALLOWED_ORIGINS = config(
- #   "CORS_ALLOWED_ORIGINS",
-  #  default="http://localhost:5173",
-   # cast=lambda v: [s.strip() for s in v.split(",")],
-#)
+# ─── CORS ──────────────────────────────────────────────────────────
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# ─── Email avec SendGrid (production) / Console (développement) ─────
+# ─── Email ─────────────────────────────────────────────────────────
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 
 if DEBUG:
@@ -215,12 +222,9 @@ else:
     DEFAULT_FROM_EMAIL = "noreply@agriconnect.com"
     SERVER_EMAIL = "noreply@agriconnect.com"
 
-# ─── Sécurité pour la production ───────────────────────────────────
+# ─── Sécurité production ───────────────────────────────────────────
 if not DEBUG:
-    # Allowed hosts
     ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
-
-    # HTTPS / SSL
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -230,31 +234,38 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-
-    # Logging (optionnel) – peut être désactivé en production ou gardé
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "console": {"class": "logging.StreamHandler"},
-        },
-        "root": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
-    }
 else:
-    # En développement, on accepte localhost
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-    # Logging simple
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "console": {"class": "logging.StreamHandler"},
-        },
-        "root": {
+
+# ─── Logging ───────────────────────────────────────────────────────
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING" if not DEBUG else "INFO",
+    },
+    "loggers": {
+        "django": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
+
+# ─── Cache ─────────────────────────────────────────────────────────
+# ✅ Cache mémoire local (gratuit, améliore les perfs sans Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "agriconnect-cache",
+        "TIMEOUT": 300,  # 5 minutes
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
         },
     }
+}
