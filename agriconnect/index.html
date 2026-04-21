@@ -2,158 +2,64 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
       content="AgriConnect – La marketplace agricole qui connecte fermiers et acheteurs"
     />
-    <!-- Couleur de la barre d’état (thème) -->
-    <meta name="theme-color" content="#166534" />
     <title>AgriConnect</title>
 
-    <!-- Favicon — plusieurs formats pour compatibilité maximale -->
-
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- ✅ Favicon dans TOUS les formats que les navigateurs cherchent -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
 
-    <!-- Préconnexion aux serveurs Google Fonts -->
+    <!-- Préconnexions -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
 
-    <!-- Préchargement de l'image hero pour améliorer le LCP -->
+    <!-- Google Fonts — NON BLOQUANT -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      />
+    </noscript>
+
+    <!-- Preload hero image -->
     <link
       rel="preload"
       as="image"
-      href="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop"
+      href="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=65&auto=format&fit=crop&fm=webp"
       imagesrcset="
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop 640w,
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=60&auto=format&fit=crop 828w,
-        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop 1200w
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop&fm=webp   640w,
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=65&auto=format&fit=crop&fm=webp   828w,
+        https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1080&q=68&auto=format&fit=crop&fm=webp 1080w
       "
       imagesizes="100vw"
       fetchpriority="high"
     />
 
-    <!-- Préchargement des ressources critiques -->
-    <link rel="preload" as="style" href="/assets/index-CPMsTIRY.css" />
-    <link rel="preload" as="script" href="/assets/index-DsEmUMMh.js" />
-    <link rel="preload" as="script" href="/assets/Home-YRxiCdDI.js" />
-
-    <!-- Chargement non‑bloquant de Poppins (ne bloque pas le rendu initial) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
-
-    <!-- Style de fallback pour éviter le FOUT (Flash of Unstyled Text) -->
     <style>
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          Helvetica,
-          Arial,
-          sans-serif;
-        background-color: #fafaf9;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         margin: 0;
-        padding: 0;
-      }
-      .no-js {
-        display: block;
-        text-align: center;
-        padding: 2rem;
-        background: #fef3c7;
-        color: #78350f;
+        background: #fafaf9;
       }
     </style>
   </head>
   <body>
-    <!-- Lien d’accessibilité : passer directement au contenu principal -->
-    <a
-      href="#main-content"
-      class="skip-to-content"
-      style="
-        position: absolute;
-        top: -40px;
-        left: 0;
-        background: #166534;
-        color: white;
-        padding: 8px 16px;
-        text-decoration: none;
-        z-index: 100;
-        border-radius: 0 0 4px 4px;
-      "
-    >
-      Aller au contenu principal
-    </a>
-
     <div id="root"></div>
-
-    <!-- Placeholder hero image pour améliorer le LCP - sera caché par React -->
-    <div
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: -1;
-      "
-    >
-      <img
-        src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop"
-        srcset="
-          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=640&q=60&auto=format&fit=crop   640w,
-          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=828&q=60&auto=format&fit=crop   828w,
-          https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=1200&q=60&auto=format&fit=crop 1200w
-        "
-        sizes="100vw"
-        alt="Champs agricoles"
-        fetchpriority="high"
-        style="
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-        "
-      />
-    </div>
-
-    <!-- Script pour rendre le CSS non-bloquant -->
-    <script>
-      // Rendre le CSS injecté par Vite non-bloquant
-      const cssLink = document.querySelector('link[href*=".css"]');
-      if (cssLink) {
-        cssLink.media = "print";
-        cssLink.onload = function () {
-          this.media = "all";
-        };
-      }
-    </script>
-
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- Gestion simple pour les navigateurs sans JS -->
-    <noscript>
-      <div class="no-js">
-        <p>
-          Votre navigateur ne supporte pas JavaScript. Certaines fonctionnalités
-          d'AgriConnect nécessitent JavaScript.
-        </p>
-        <p>Veuillez activer JavaScript ou utiliser un navigateur moderne.</p>
-      </div>
-    </noscript>
   </body>
 </html>
