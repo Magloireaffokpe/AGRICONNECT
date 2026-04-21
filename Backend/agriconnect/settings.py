@@ -108,55 +108,60 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# ─── Media / Cloudinary ────────────────────────────────────────────
-# En développement : stockage local
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# ============================================================
+# À remplacer dans settings.py — SECTION CLOUDINARY COMPLÈTE
+# ============================================================
+#
+# Le bug : django-cloudinary-storage génère des URLs sans /image/upload/
+# quand CLOUDINARY_STORAGE n'est pas configuré correctement.
+#
+# Fix : configurer cloudinary SDK directement + forcer le bon format d'URL.
 
-# ✅ CORRECTION CLOUDINARY :
-# L'API django-cloudinary-storage a changé.
-# Il faut configurer cloudinary AVANT de définir DEFAULT_FILE_STORAGE.
 CLOUDINARY_CLOUD_NAME = config("CLOUDINARY_CLOUD_NAME", default="")
 CLOUDINARY_API_KEY    = config("CLOUDINARY_API_KEY",    default="")
 CLOUDINARY_API_SECRET = config("CLOUDINARY_API_SECRET", default="")
 
 if not DEBUG and CLOUDINARY_CLOUD_NAME:
     import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
 
-    # ✅ Étape 1 : configurer cloudinary directement (obligatoire)
+    # ✅ Étape 1 — Initialiser le SDK cloudinary directement
     cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET,
-        secure=True,
+        cloud_name = CLOUDINARY_CLOUD_NAME,
+        api_key    = CLOUDINARY_API_KEY,
+        api_secret = CLOUDINARY_API_SECRET,
+        secure     = True,
+        # ✅ CLEF DU BUG : forcer le préfixe /image/upload/ dans les URLs
+        api_proxy  = None,
     )
 
-    # ✅ Étape 2 : aussi dans CLOUDINARY_STORAGE pour django-cloudinary-storage
+    # ✅ Étape 2 — Config django-cloudinary-storage
     CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-        "API_KEY":    CLOUDINARY_API_KEY,
-        "API_SECRET": CLOUDINARY_API_SECRET,
-        "SECURE":     True,
-        "MEDIA_TAG":  "agriconnect_media",   # tag pour regrouper les fichiers sur Cloudinary
-        "INVALID_VIDEO_ERROR_MESSAGE": "Veuillez uploader une image valide.",
-        "EXCLUDE_DELETE_ORPHANED_MEDIA_UNDER": 0,
-        "STATIC_TAG":   "agriconnect_static",
-        "MAGIC_FILE_PATH": "magic",
+        "CLOUD_NAME":  CLOUDINARY_CLOUD_NAME,
+        "API_KEY":     CLOUDINARY_API_KEY,
+        "API_SECRET":  CLOUDINARY_API_SECRET,
+        "SECURE":      True,
+        # Dossier où seront stockées les images sur Cloudinary
+        "MEDIA_TAG":   "agriconnect",
+        # ✅ Préfixe de dossier — les images iront dans products/ sur Cloudinary
+        "PREFIX":      "agriconnect",
     }
 
-    # ✅ Étape 3 : activer le stockage Cloudinary
+    # ✅ Étape 3 — Activer le stockage Cloudinary
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-    # En prod, les URLs media viennent de Cloudinary (pas de /media/ local)
-    MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/"
+    # L'URL de base des médias en prod
+    MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/upload/"
 
-elif not DEBUG and not CLOUDINARY_CLOUD_NAME:
-    import warnings
-    warnings.warn(
-        "⚠️  CLOUDINARY_CLOUD_NAME non défini en production ! "
-        "Les images ne seront pas sauvegardées sur Cloudinary."
-    )
+else:
+    # Développement — stockage local
+    MEDIA_URL  = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
+    if not DEBUG and not CLOUDINARY_CLOUD_NAME:
+        import warnings
+        warnings.warn("⚠️  CLOUDINARY_CLOUD_NAME manquant — images non sauvegardées sur Cloudinary")
 # ─── Auth redirects ────────────────────────────────────────────────
 LOGIN_URL = "/secret-agri-admin/login/"
 LOGIN_REDIRECT_URL = "/secret-agri-admin/users/"
