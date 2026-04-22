@@ -1,66 +1,90 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { User } from '../types'
-import { authService } from '../services/auth'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { User } from "../types";
+import { authService } from "../services/auth";
 
 interface AuthContextValue {
-  user: User | null
-  isLoading: boolean
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  refreshUser: () => Promise<void>
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null);
+  // ✅ FIX PRINCIPAL : isLoading démarre à FALSE si pas de token
+  // Cela évite que les pages PUBLIQUES (ProductDetail, Products) soient
+  // bloquées en attendant une vérification auth qui ne servira à rien.
+  const [isLoading, setIsLoading] = useState(() => {
+    // Seulement true si un token existe — sinon visiteur immédiat
+    return !!localStorage.getItem("access_token");
+  });
 
   const fetchMe = async () => {
     try {
-      const me = await authService.getMe()
-      setUser(me)
+      const me = await authService.getMe();
+      setUser(me);
     } catch {
-      setUser(null)
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      // Token invalide/expiré → déconnexion silencieuse
+      setUser(null);
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
+    const token = localStorage.getItem("access_token");
     if (token) {
-      fetchMe().finally(() => setIsLoading(false))
-    } else {
-      setIsLoading(false)
+      // Token présent → vérifier si valide
+      fetchMe();
     }
-  }, [])
+    // Pas de token → isLoading est déjà false (initialisé à false)
+  }, []);
 
   const login = async (email: string, password: string) => {
-    const data = await authService.login(email, password)
-    localStorage.setItem('access_token', data.access)
-    localStorage.setItem('refresh_token', data.refresh)
-    setUser(data.user)
-  }
+    const data = await authService.login(email, password);
+    localStorage.setItem("access_token", data.access);
+    localStorage.setItem("refresh_token", data.refresh);
+    setUser(data.user);
+  };
 
   const logout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    setUser(null)
-  }
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setUser(null);
+  };
 
-  const refreshUser = fetchMe
+  const refreshUser = fetchMe;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, refreshUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        refreshUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = () => {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
-}
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+};
