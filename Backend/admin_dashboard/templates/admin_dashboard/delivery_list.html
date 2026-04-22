@@ -1,6 +1,8 @@
 {% extends 'admin_dashboard/base.html' %} {% block content %}
 <h2>Livraisons</h2>
-<div class="table-responsive">
+
+<!-- Version desktop : tableau -->
+<div class="d-none d-md-block table-responsive">
   <table class="table table-striped">
     <thead>
       <tr>
@@ -43,10 +45,49 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7">Aucune livraison pour le moment.</td>
+        <td colspan="7">Aucune livraison pour le moment.{% endfor %}</td>
       </tr>
-      {% endfor %}
     </tbody>
   </table>
+</div>
+
+<!-- Version mobile : cartes -->
+<div class="d-md-none">
+  {% for delivery in deliveries %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 class="card-title mb-0">Livraison #{{ delivery.id }}</h6>
+        <span
+          class="badge {% if delivery.delivery_status == 'PENDING' %}bg-warning {% elif delivery.delivery_status == 'IN_TRANSIT' %}bg-info {% elif delivery.delivery_status == 'DELIVERED' %}bg-success {% else %}bg-danger{% endif %}"
+        >
+          {{ delivery.get_delivery_status_display }}
+        </span>
+      </div>
+      <p class="card-text mb-1">
+        <strong>Commande :</strong> #{{ delivery.order.id }}
+      </p>
+      <p class="card-text mb-1">
+        <strong>Acheteur :</strong> {{ delivery.order.buyer.get_full_name }}<br /><small
+          >{{ delivery.order.buyer.email }}</small
+        >
+      </p>
+      <p class="card-text mb-1">
+        <strong>Adresse :</strong> {{ delivery.delivery_address|default:"—" }}
+      </p>
+      <p class="card-text mb-1">
+        <strong>Créée le :</strong> {{ delivery.created_at|date:"d/m/Y H:i" }}
+      </p>
+      <p class="card-text mb-0">
+        <strong>Livraison prévue :</strong> {{
+        delivery.delivery_date|date:"d/m/Y"|default:"—" }}
+      </p>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center py-5 text-muted">
+    Aucune livraison pour le moment.
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}
