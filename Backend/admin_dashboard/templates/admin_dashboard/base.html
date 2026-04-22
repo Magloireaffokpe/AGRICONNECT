@@ -3,164 +3,408 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Administration AgriConnect</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>{% block title %}Administration AgriConnect{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap + Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+
     <style>
+      :root {
+        --green-dark: #166534;
+        --green-mid: #16a34a;
+        --green-light: #dcfce7;
+        --sidebar-w: 240px;
+        --nav-h: 60px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: "Inter", sans-serif;
-        background-color: #f4f7f6;
-        color: #2c3e50;
+        font-family: "Inter", system-ui, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        margin: 0;
+        min-height: 100vh;
       }
-      .navbar-custom {
-        background: linear-gradient(135deg, #1e7145 0%, #2e8b57 100%);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+      /* ── Topbar ─────────────────────────────────── */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--nav-h);
+        background: linear-gradient(135deg, var(--green-dark) 0%, #1a7a42 100%);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        gap: 0.75rem;
       }
-      .navbar-brand {
+
+      .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        font-size: 1rem;
+        color: #fff;
+        text-decoration: none;
+        white-space: nowrap;
       }
-      .nav-btn {
+      .topbar-brand .brand-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .topbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex: 1;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .topbar-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.4rem 0.875rem;
         border-radius: 20px;
-        padding: 0.375rem 1rem;
-        transition: all 0.3s ease;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s;
+        border: 1px solid transparent;
       }
-      .nav-btn:hover {
-        transform: translateY(-2px);
+      .nav-pill:hover,
+      .nav-pill.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
       }
-      .card-custom {
+      .nav-pill i {
+        font-size: 0.75rem;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+
+      .user-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        color: #fff;
+        font-size: 0.8125rem;
+      }
+      .user-pill .avatar {
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .user-pill span {
+        display: none;
+      }
+      @media (min-width: 768px) {
+        .user-pill span {
+          display: block;
+          max-width: 120px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      /* ── Bouton icône topbar ─── */
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
         border: none;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        background: #ffffff;
+        background: transparent;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+        flex-shrink: 0;
       }
-      .table-custom th {
-        background-color: #f8f9fa;
-        color: #6c757d;
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+      }
+      .icon-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fca5a5;
+      }
+
+      /* ── Main content ─────────────────────────────── */
+      .main-wrap {
+        padding-top: calc(var(--nav-h) + 1.5rem);
+        padding-bottom: 2rem;
+        min-height: 100vh;
+      }
+
+      /* ── Cards ─────────────────────────────────────── */
+      .card {
+        border: none !important;
+        border-radius: 14px !important;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.06),
+          0 4px 16px rgba(0, 0, 0, 0.04) !important;
+        overflow: hidden;
+      }
+      .card-header {
+        background: #fff !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        padding: 1rem 1.25rem !important;
+      }
+
+      /* ── Table ──────────────────────────────────────── */
+      .table th {
+        background: #f8fafc !important;
+        color: #64748b;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.85rem;
         letter-spacing: 0.5px;
+        border-bottom: 1px solid #e2e8f0 !important;
+        white-space: nowrap;
       }
-      /* Responsive ajustements */
-      @media (max-width: 768px) {
-        .navbar .btn-sm {
-          font-size: 0.75rem;
-          padding: 0.25rem 0.5rem;
+      .table td {
+        border-color: #f1f5f9 !important;
+        vertical-align: middle;
+        font-size: 0.875rem;
+      }
+      .table tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      /* ── Badges ─────────────────────────────────────── */
+      .badge {
+        font-weight: 500 !important;
+        letter-spacing: 0.2px;
+      }
+
+      /* ── Alert ──────────────────────────────────────── */
+      .alert {
+        border: none !important;
+        border-radius: 12px !important;
+        font-size: 0.875rem;
+      }
+
+      /* ── Boutons ─────────────────────────────────────── */
+      .btn {
+        font-size: 0.8125rem !important;
+        font-weight: 500 !important;
+        border-radius: 8px !important;
+      }
+      .btn-sm {
+        padding: 0.375rem 0.75rem !important;
+      }
+
+      /* ── Mobile adjustments ─────────────────────────── */
+      @media (max-width: 576px) {
+        .container {
+          padding-left: 0.875rem;
+          padding-right: 0.875rem;
         }
-        .navbar-brand {
-          font-size: 1.2rem;
+        .main-wrap {
+          padding-top: calc(var(--nav-h) + 1rem);
+        }
+        .table-responsive {
+          border-radius: 14px;
+        }
+        h2.page-title {
+          font-size: 1.25rem;
+        }
+      }
+
+      /* ── Hamburger mobile ── */
+      .hamburger {
+        display: none;
+      }
+      @media (max-width: 991px) {
+        .topbar-nav {
+          display: none;
+        }
+        .topbar-nav.show {
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          top: var(--nav-h);
+          left: 0;
+          right: 0;
+          background: var(--green-dark);
+          padding: 0.75rem 1rem;
+          gap: 0.25rem;
+          z-index: 999;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        .hamburger {
+          display: flex;
+        }
+        .nav-pill {
+          width: 100%;
+          padding: 0.6rem 0.875rem;
         }
       }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
-      <div class="container">
-        <a class="navbar-brand" href="{% url 'admin_dashboard:stats' %}">
-          <i class="fas fa-leaf me-2"></i>AgriConnect Admin
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
+    <!-- ═══ TOPBAR ═══════════════════════════════════════════════ -->
+    <nav class="topbar">
+      <a href="{% url 'admin_dashboard:stats' %}" class="topbar-brand">
+        <div class="brand-icon">🌾</div>
+        <span>AgriConnect</span>
+      </a>
+
+      <!-- Hamburger mobile -->
+      <button
+        class="icon-btn hamburger"
+        id="hamburgerBtn"
+        aria-label="Menu"
+        onclick="toggleMobileNav()"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Nav links -->
+      <div class="topbar-nav" id="topbarNav">
+        <a
+          href="{% url 'admin_dashboard:stats' %}"
+          class="nav-pill {% if request.resolver_match.url_name == 'stats' %}active{% endif %}"
         >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <!-- L'espace pour d'éventuels liens supplémentaires -->
-          </ul>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="text-white-50 me-3 d-none d-md-inline">
-              <i class="fas fa-user-circle me-1"></i> {{ request.user.email }}
-            </span>
+          <i class="fas fa-chart-pie"></i> Stats
+        </a>
+        <a
+          href="{% url 'admin_dashboard:user_list' %}"
+          class="nav-pill {% if 'user' in request.resolver_match.url_name %}active{% endif %}"
+        >
+          <i class="fas fa-users"></i> Utilisateurs
+        </a>
+        <a
+          href="{% url 'admin_dashboard:delivery_list' %}"
+          class="nav-pill {% if 'delivery' in request.resolver_match.url_name %}active{% endif %}"
+        >
+          <i class="fas fa-truck"></i> Livraisons
+        </a>
+        <a href="{% url 'admin:index' %}" class="nav-pill">
+          <i class="fas fa-cogs"></i> Django Admin
+        </a>
+      </div>
 
-            <!-- Bouton Statistiques -->
-            <a
-              href="{% url 'admin_dashboard:stats' %}"
-              class="btn btn-sm btn-outline-light nav-btn"
-            >
-              <i class="fas fa-chart-pie me-1"></i>Stats
-            </a>
-
-            <!-- Bouton Utilisateurs -->
-            <a
-              href="{% url 'admin_dashboard:user_list' %}"
-              class="btn btn-sm btn-outline-light nav-btn"
-            >
-              <i class="fas fa-users me-1"></i>Utilisateurs
-            </a>
-
-            <!-- 🆕 Bouton Livraisons -->
-            <a
-              href="{% url 'admin_dashboard:delivery_list' %}"
-              class="btn btn-sm btn-outline-light nav-btn"
-            >
-              <i class="fas fa-truck me-1"></i>Livraisons
-            </a>
-
-            <!-- Bouton Admin Django -->
-            <a
-              href="{% url 'admin:index' %}"
-              class="btn btn-sm btn-outline-light nav-btn"
-            >
-              <i class="fas fa-cogs me-1"></i>Django
-            </a>
-
-            <!-- Bouton Changer mot de passe (icône) -->
-            <a
-              href="{% url 'admin_dashboard:change_password' %}"
-              class="btn btn-sm text-white"
-              title="Changer mot de passe"
-            >
-              <i class="fas fa-key"></i>
-            </a>
-
-            <!-- Bouton Déconnexion -->
-            <form
-              action="{% url 'admin_dashboard:logout' %}"
-              method="post"
-              style="display: inline"
-            >
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-danger nav-btn ms-2">
-                <i class="fas fa-sign-out-alt me-1"></i>Quitter
-              </button>
-            </form>
-          </div>
+      <!-- Right actions -->
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar">{{ request.user.email|slice:":1"|upper }}</div>
+          <span>{{ request.user.email }}</span>
         </div>
+
+        <a
+          href="{% url 'admin_dashboard:change_password' %}"
+          class="icon-btn"
+          title="Changer mot de passe"
+        >
+          <i class="fas fa-key fa-sm"></i>
+        </a>
+
+        <form
+          action="{% url 'admin_dashboard:logout' %}"
+          method="post"
+          style="display: inline"
+        >
+          {% csrf_token %}
+          <button type="submit" class="icon-btn danger" title="Déconnexion">
+            <i class="fas fa-sign-out-alt fa-sm"></i>
+          </button>
+        </form>
       </div>
     </nav>
 
-    <div class="container mt-5 mb-5">
-      {% if messages %} {% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm"
-        role="alert"
-      >
-        {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+    <!-- ═══ CONTENT ═══════════════════════════════════════════════ -->
+    <div class="main-wrap">
+      <div class="container">
+        {% if messages %} {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4 shadow-sm"
+          role="alert"
+        >
+          <i class="fas fa-info-circle me-2"></i>{{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+          ></button>
+        </div>
+        {% endfor %} {% endif %} {% block content %}{% endblock %}
       </div>
-      {% endfor %} {% endif %} {% block content %}{% endblock %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function toggleMobileNav() {
+        const nav = document.getElementById("topbarNav");
+        nav.classList.toggle("show");
+      }
+      // Fermer le menu mobile en cliquant ailleurs
+      document.addEventListener("click", (e) => {
+        const nav = document.getElementById("topbarNav");
+        const btn = document.getElementById("hamburgerBtn");
+        if (!nav.contains(e.target) && !btn.contains(e.target)) {
+          nav.classList.remove("show");
+        }
+      });
+    </script>
   </body>
 </html>

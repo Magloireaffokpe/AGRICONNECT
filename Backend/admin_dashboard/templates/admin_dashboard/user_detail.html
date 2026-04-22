@@ -1,85 +1,314 @@
-{% extends 'admin_dashboard/base.html' %} {% block content %}
-<div class="card card-custom">
-  <div class="card-header bg-white border-0 py-3">
-    <h3 class="fw-bold mb-0">
-      <i class="fas fa-user-circle text-success me-2"></i>
-      Détails de l'utilisateur
-    </h3>
-  </div>
-  <div class="card-body">
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">ID :</div>
-      <div class="col-md-9">{{ user.id }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Nom complet :</div>
-      <div class="col-md-9">
-        {{ user.get_full_name|default:"Non renseigné" }}
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Email :</div>
-      <div class="col-md-9">{{ user.email }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Téléphone :</div>
-      <div class="col-md-9">{{ user.phone|default:"—" }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Localisation :</div>
-      <div class="col-md-9">{{ user.location|default:"—" }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Rôle :</div>
-      <div class="col-md-9">
-        <span class="badge border border-secondary text-secondary rounded-pill"
-          >{{ user.role }}</span
+{% extends 'admin_dashboard/base.html' %} {% block title %}{{
+user.get_full_name|default:user.email }} – AgriConnect Admin{% endblock %} {%
+block content %}
+<div class="mb-4">
+  <a
+    href="{% url 'admin_dashboard:user_list' %}"
+    class="btn btn-sm btn-outline-secondary"
+  >
+    <i class="fas fa-arrow-left me-1 fa-xs"></i> Retour aux utilisateurs
+  </a>
+</div>
+
+<div class="row g-4">
+  <!-- Carte principale -->
+  <div class="col-12 col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-3">
+        <div
+          style="
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ade80, #166534);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+          "
         >
+          {{ user.get_full_name|default:user.email|slice:":1"|upper }}
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0">{{ user.get_full_name|default:"—" }}</h5>
+          <span class="text-muted small">{{ user.email }}</span>
+        </div>
+        <div class="ms-auto d-flex gap-2">
+          {% if user.is_active %}
+          <span class="badge rounded-pill bg-success">Actif</span>
+          {% else %}
+          <span class="badge rounded-pill bg-danger">Inactif</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for label, value, icon in field_list %}
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="{{ icon }} me-1"></i>{{ label }}
+              </div>
+              <div
+                class="fw-semibold"
+                style="font-size: 0.9rem; color: #1e293b"
+              >
+                {{ value|default:"—" }}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <!-- Fallback si field_list n'est pas passé dans le contexte -->
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="fas fa-id-badge me-1"></i>ID
+              </div>
+              <div class="fw-semibold" style="font-size: 0.9rem">
+                #{{ user.id }}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="fas fa-envelope me-1"></i>Email
+              </div>
+              <div class="fw-semibold" style="font-size: 0.9rem">
+                {{ user.email }}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="fas fa-phone me-1"></i>Téléphone
+              </div>
+              <div class="fw-semibold" style="font-size: 0.9rem">
+                {{ user.phone|default:"—" }}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="fas fa-map-marker-alt me-1"></i>Localisation
+              </div>
+              <div class="fw-semibold" style="font-size: 0.9rem">
+                {{ user.location|default:"—" }}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div
+              class="p-3 rounded-3"
+              style="background: #f8fafc; border: 1px solid #e2e8f0"
+            >
+              <div
+                class="text-muted"
+                style="
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <i class="fas fa-calendar me-1"></i>Inscription
+              </div>
+              <div class="fw-semibold" style="font-size: 0.9rem">
+                {{ user.date_joined|date:"d/m/Y" }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Compte actif :</div>
-      <div class="col-md-9">
-        {% if user.is_active %}
-        <span class="badge bg-success rounded-pill">Actif</span>
-        {% else %}
-        <span class="badge bg-danger rounded-pill">Inactif</span>
-        {% endif %}
+  </div>
+
+  <!-- Carte rôle + ferme -->
+  <div class="col-12 col-lg-4">
+    <!-- Rôle -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h6 class="fw-bold mb-0">
+          <i class="fas fa-shield-alt me-2 text-success"></i>Rôle & statut
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          {% if user.role == 'FARMER' %}
+          <span
+            class="badge rounded-pill fs-6 px-3 py-2"
+            style="background: #fef3c7; color: #92400e"
+            >👨‍🌾 Agriculteur</span
+          >
+          {% elif user.role == 'BUYER' %}
+          <span
+            class="badge rounded-pill fs-6 px-3 py-2"
+            style="background: #dbeafe; color: #1e40af"
+            >🛒 Acheteur</span
+          >
+          {% else %}
+          <span
+            class="badge rounded-pill fs-6 px-3 py-2"
+            style="background: #f3e8ff; color: #6b21a8"
+            >⚙️ Admin</span
+          >
+          {% endif %}
+        </div>
+        <div
+          class="d-flex align-items-center justify-content-between p-2 rounded-2"
+          style="background: #f8fafc"
+        >
+          <span class="text-muted small">Compte actif</span>
+          {% if user.is_active %}
+          <i class="fas fa-check-circle text-success"></i>
+          {% else %}
+          <i class="fas fa-times-circle text-danger"></i>
+          {% endif %}
+        </div>
       </div>
     </div>
 
+    <!-- Profil agriculteur -->
     {% if user.role == 'FARMER' %}
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Nom de la ferme :</div>
-      <div class="col-md-9">
-        {{ user.farmer_profile.farm_name|default:"—" }}
+    <div class="card">
+      <div class="card-header">
+        <h6 class="fw-bold mb-0">
+          <i class="fas fa-tractor me-2 text-success"></i>Profil agriculteur
+        </h6>
       </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Biographie :</div>
-      <div class="col-md-9">{{ user.farmer_profile.bio|default:"—" }}</div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-md-3 fw-bold">Vérifié :</div>
-      <div class="col-md-9">
-        {% if user.farmer_profile.verified %}
-        <span class="badge bg-success bg-opacity-10 text-success"
-          ><i class="fas fa-check-circle"></i> Oui</span
+      <div class="card-body">
+        <div class="mb-3">
+          <div
+            class="text-muted"
+            style="
+              font-size: 0.7rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 0.25rem;
+            "
+          >
+            Nom de la ferme
+          </div>
+          <div class="fw-semibold">
+            {{ user.farmer_profile.farm_name|default:"—" }}
+          </div>
+        </div>
+        {% if user.farmer_profile.bio %}
+        <div class="mb-3">
+          <div
+            class="text-muted"
+            style="
+              font-size: 0.7rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 0.25rem;
+            "
+          >
+            Biographie
+          </div>
+          <div class="text-muted small">{{ user.farmer_profile.bio }}</div>
+        </div>
+        {% endif %}
+        <div
+          class="d-flex align-items-center justify-content-between p-2 rounded-2"
+          style="background: #f8fafc"
         >
-        {% else %}
-        <span class="badge bg-warning bg-opacity-10 text-warning"
-          ><i class="fas fa-clock"></i> Non</span
+          <span class="text-muted small">Agriculteur vérifié</span>
+          {% if user.farmer_profile.verified %}
+          <span
+            class="badge"
+            style="background: #dcfce7; color: #166534; font-size: 0.75rem"
+            ><i class="fas fa-check-circle me-1"></i>Oui</span
+          >
+          {% else %}
+          <span
+            class="badge"
+            style="background: #fef9c3; color: #713f12; font-size: 0.75rem"
+            ><i class="fas fa-clock me-1"></i>Non</span
+          >
+          {% endif %}
+        </div>
+        {% if not user.farmer_profile.verified %}
+        <a
+          href="{% url 'admin_dashboard:toggle_verify' user.id %}"
+          class="btn btn-success btn-sm w-100 mt-3"
         >
+          <i class="fas fa-check-double me-1 fa-xs"></i> Vérifier cet
+          agriculteur
+        </a>
         {% endif %}
       </div>
     </div>
     {% endif %}
-
-    <div class="mt-4">
-      <a href="{% url 'admin_dashboard:user_list' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Retour
-      </a>
-    </div>
   </div>
 </div>
 {% endblock %}
