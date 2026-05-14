@@ -11,6 +11,16 @@ import { CartProvider } from './contexts/CartContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import './index.css'
 
+// ── Désinscrire tout Service Worker orphelin ──────────────────────────────
+// Ce projet n'utilise pas de SW. Si le navigateur en a mis un en cache
+// (session précédente, Vite PWA plugin, autre projet sur localhost:5173),
+// il intercepte les requêtes Unsplash et provoque des erreurs réseau.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((reg) => reg.unregister())
+  })
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>

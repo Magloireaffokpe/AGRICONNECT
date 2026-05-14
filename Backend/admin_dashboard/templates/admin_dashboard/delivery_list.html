@@ -1,91 +1,102 @@
-{% extends 'admin_dashboard/base.html' %} {% block content %}
-<h2>Livraisons</h2>
+{% extends 'admin_dashboard/base.html' %} 
 
-<!-- Version desktop : tableau -->
-<div class="d-none d-md-block table-responsive">
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Commande</th>
-        <th>Acheteur</th>
-        <th>Adresse</th>
-        <th>Statut livraison</th>
-        <th>Créée le</th>
-        <th>Livraison prévue</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for delivery in deliveries %}
-      <tr>
-        <td>{{ delivery.id }}</td>
-        <td>
-          <a href="{% url 'admin:orders_order_change' delivery.order.id %}"
-            >#{{ delivery.order.id }}</a
-          >
-        </td>
-        <td>
-          {{ delivery.order.buyer.get_full_name }}<br />
-          <small class="text-muted">{{ delivery.order.buyer.email }}</small>
-        </td>
-        <td>{{ delivery.delivery_address|default:"—" }}</td>
-        <td>
-          {% if delivery.delivery_status == 'PENDING' %}
-          <span class="badge bg-warning">En attente</span>
-          {% elif delivery.delivery_status == 'IN_TRANSIT' %}
-          <span class="badge bg-info">En transit</span>
-          {% elif delivery.delivery_status == 'DELIVERED' %}
-          <span class="badge bg-success">Livrée</span>
-          {% else %}
-          <span class="badge bg-danger">Échouée</span>
-          {% endif %}
-        </td>
-        <td>{{ delivery.created_at|date:"d/m/Y H:i" }}</td>
-        <td>{{ delivery.delivery_date|date:"d/m/Y"|default:"—" }}</td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="7">Aucune livraison pour le moment.{% endfor %}</td>
-      </tr>
-    </tbody>
-  </table>
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold text-dark">
+    <i class="fas fa-truck text-success me-2"></i>Livraisons
+  </h2>
 </div>
 
-<!-- Version mobile : cartes -->
+<div class="card card-custom d-none d-md-block shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-custom mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">ID</th>
+            <th>Commande</th>
+            <th>Acheteur</th>
+            <th>Adresse</th>
+            <th>Statut livraison</th>
+            <th>Créée le</th>
+            <th class="pe-4">Livraison prévue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for delivery in deliveries %}
+          <tr>
+            <td class="ps-4 fw-bold text-muted">#{{ delivery.id }}</td>
+            <td>
+              <a href="{% url 'admin:orders_order_change' delivery.order.id %}" class="text-decoration-none fw-bold text-success">
+                #{{ delivery.order.id }}
+              </a>
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ delivery.order.buyer.get_full_name }}</div>
+              <div class="small text-muted">{{ delivery.order.buyer.email }}</div>
+            </td>
+            <td>{{ delivery.delivery_address|default:"—" }}</td>
+            <td>
+              {% if delivery.delivery_status == 'PENDING' %}
+              <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>En attente</span>
+              {% elif delivery.delivery_status == 'IN_TRANSIT' %}
+              <span class="badge bg-info text-white"><i class="fas fa-truck-fast me-1"></i>En transit</span>
+              {% elif delivery.delivery_status == 'DELIVERED' %}
+              <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Livrée</span>
+              {% else %}
+              <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Échouée</span>
+              {% endif %}
+            </td>
+            <td>{{ delivery.created_at|date:"d/m/Y H:i" }}</td>
+            <td class="pe-4 fw-medium">{{ delivery.delivery_date|date:"d/m/Y"|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="fas fa-box-open fa-3x mb-3 d-block opacity-50"></i>
+              Aucune livraison pour le moment.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="d-md-none">
   {% for delivery in deliveries %}
-  <div class="card mb-3">
+  <div class="card shadow-sm border-0 mb-3">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start mb-2">
-        <h6 class="card-title mb-0">Livraison #{{ delivery.id }}</h6>
-        <span
-          class="badge {% if delivery.delivery_status == 'PENDING' %}bg-warning {% elif delivery.delivery_status == 'IN_TRANSIT' %}bg-info {% elif delivery.delivery_status == 'DELIVERED' %}bg-success {% else %}bg-danger{% endif %}"
-        >
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="card-title mb-0 fw-bold">Livraison #{{ delivery.id }}</h6>
+        <span class="badge {% if delivery.delivery_status == 'PENDING' %}bg-warning text-dark{% elif delivery.delivery_status == 'IN_TRANSIT' %}bg-info text-white{% elif delivery.delivery_status == 'DELIVERED' %}bg-success{% else %}bg-danger{% endif %}">
           {{ delivery.get_delivery_status_display }}
         </span>
       </div>
-      <p class="card-text mb-1">
-        <strong>Commande :</strong> #{{ delivery.order.id }}
+      <p class="card-text small text-muted mb-2">
+        <i class="fas fa-shopping-bag me-2"></i><strong>Commande :</strong> #{{ delivery.order.id }}
       </p>
-      <p class="card-text mb-1">
-        <strong>Acheteur :</strong> {{ delivery.order.buyer.get_full_name }}<br /><small
-          >{{ delivery.order.buyer.email }}</small
-        >
+      <p class="card-text small text-muted mb-2">
+        <i class="fas fa-user me-2"></i><strong>Acheteur :</strong> {{ delivery.order.buyer.get_full_name }} <br/>
+        <span class="ms-4">{{ delivery.order.buyer.email }}</span>
       </p>
-      <p class="card-text mb-1">
-        <strong>Adresse :</strong> {{ delivery.delivery_address|default:"—" }}
+      <p class="card-text small text-muted mb-2">
+        <i class="fas fa-map-marker-alt me-2 text-danger"></i><strong>Adresse :</strong> {{ delivery.delivery_address|default:"—" }}
       </p>
-      <p class="card-text mb-1">
-        <strong>Créée le :</strong> {{ delivery.created_at|date:"d/m/Y H:i" }}
+      <p class="card-text small text-muted mb-2">
+        <i class="far fa-calendar-alt me-2"></i><strong>Créée le :</strong> {{ delivery.created_at|date:"d/m/Y H:i" }}
       </p>
-      <p class="card-text mb-0">
-        <strong>Livraison prévue :</strong> {{
-        delivery.delivery_date|date:"d/m/Y"|default:"—" }}
-      </p>
+      <div class="p-2 mt-2 bg-light rounded text-center">
+        <p class="card-text mb-0 text-dark">
+          <i class="fas fa-calendar-check me-2 text-success"></i><strong>Prévue le :</strong> {{ delivery.delivery_date|date:"d/m/Y"|default:"—" }}
+        </p>
+      </div>
     </div>
   </div>
   {% empty %}
   <div class="text-center py-5 text-muted">
+    <i class="fas fa-box-open fa-3x mb-3 d-block opacity-50"></i>
     Aucune livraison pour le moment.
   </div>
   {% endfor %}
